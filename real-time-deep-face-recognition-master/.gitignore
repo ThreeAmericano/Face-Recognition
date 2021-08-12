@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# pre trained data
+20180408-102900/
