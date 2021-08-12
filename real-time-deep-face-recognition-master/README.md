@@ -1,3 +1,12 @@
+https://drive.google.com/file/d/1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz/view
+
+다운로드 -> 20180408-102900 폴더에 넣기
+
+https://github.com/bearsprogrammer/real-time-deep-face-recognition/blob/master/Make_classifier_git.py
+
+활용
+
+
 # real-time-deep-face-recogniton
 
 Real-time face recognition program using Google's facenet.
