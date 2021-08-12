@@ -1,0 +1,11 @@
+./output_dir\person1\person1_02.png 28 43 121 169
+./output_dir\person1\person1_03.png 111 15 134 47
+./output_dir\person1\person1_04.png 136 56 182 119
+./output_dir\person1\person1_05.png 53 60 145 200
+./output_dir\person1\person1_06.png 110 33 159 105
+./output_dir\person1\person1_07.png 101 17 146 79
+./output_dir\person2\person2_07.png 107 39 153 106
+./output_dir\person2\person2_08.png 93 39 199 172
+./output_dir\person2\person2_10.png 69 75 102 116
+./output_dir\person2\person2_14.png 60 26 147 141
+./output_dir\person2\person2_15.png 107 37 174 118
