@@ -1,10 +1,34 @@
 https://drive.google.com/file/d/1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz/view
 
-다운로드 -> 20180408-102900 폴더에 넣기
+다운로드 -> 20180408-102900 폴더에 넣기 (pre trained data)
 
-https://github.com/bearsprogrammer/real-time-deep-face-recognition/blob/master/Make_classifier_git.py
+활용 : https://github.com/bearsprogrammer/real-time-deep-face-recognition/blob/master/Make_classifier_git.py
 
-활용
+# 가이드
+
+가상환경 설정 : environment.yml
+ > conda env create -f environment.yml
+
+가상환경 실행
+ > conda activate venv
+
+사진 촬영 후 저장 폴더 (30장 이상)
+ > ./faceData/train
+
+얼굴 부분 사진 align
+ > python Make_aligndata_git.py
+ 
+ > ./output_dir 에 사진 저장됨 
+
+사진 학습
+ > python Make_classifier_git.py
+
+실시간 분석
+ > realtime_facenet_git.py -> line 41 학습한 사람 이름 변경 (HumanNames)
+
+ > python realtime_facenet_git.py
+
+![image](https://user-images.githubusercontent.com/12757811/129246692-a85308ca-6244-4efb-9cb8-f21a088a3a08.png)
 
 
 # real-time-deep-face-recogniton
