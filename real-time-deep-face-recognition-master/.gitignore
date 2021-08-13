@@ -102,3 +102,5 @@ ENV/
 
 # pre trained data
 20180408-102900/
+faceData/
+output_dir/
