@@ -68,9 +68,7 @@ with tf.Graph().as_default():
 
         print('Start Recognition!')
         prevTime = 0
-        detectedPerson = [0,0,0,0]
-        detectingTime = 15 # 검사시간
-        while detectedPerson[0] < detectingTime and detectedPerson[1] < detectingTime and detectedPerson[2] < detectingTime:
+        while True:
             ret, frame = video_capture.read()
 
             frame = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)    #resize frame (optional)
@@ -86,9 +84,8 @@ with tf.Graph().as_default():
                 frame = frame[:, :, 0:3]
                 bounding_boxes, _ = detect_face.detect_face(frame, minsize, pnet, rnet, onet, threshold, factor)
                 nrof_faces = bounding_boxes.shape[0]
-                print('Detected_FaceNum: %d' % nrof_faces) # 인식한 사람 숫자
-                print(detectedPerson)
-
+                print('Detected_FaceNum: %d' % nrof_faces)
+                
 
                 if nrof_faces > 0:
                     det = bounding_boxes[:, 0:4]
@@ -135,8 +132,6 @@ with tf.Graph().as_default():
                                 result_names = HumanNames[best_class_indices[0]]
                                 cv2.putText(frame, result_names, (text_x, text_y), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                                             1, (0, 0, 255), thickness=1, lineType=2)
-
-                                detectedPerson[best_class_indices[0]] += 1
                 else:
                     print('Unable to align')
 
@@ -153,13 +148,6 @@ with tf.Graph().as_default():
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-
-        if detectedPerson[0] >= detectingTime :
-            print("detected Person is : ", HumanNames[0])
-        elif detectedPerson[1] >= detectingTime :
-            print("detected Person is : ", HumanNames[1])
-        elif detectedPerson[2] >= detectingTime :
-            print("detected Person is : ", HumanNames[2])
 
         video_capture.release()
         # #video writer
