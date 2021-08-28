@@ -1,6 +1,7 @@
-# python Make_aligndata_git.py
-# python Make_classifier_git.py
-# python realtime_facenet_git.py
+# 파일 실행하는 명령어
+# python Make_aligndata_git.py [촬영한 사진 자르면서 조정]
+# python Make_classifier_git.py  [조정된 사진으로 학습]
+# python realtime_facenet_git.py [실시간 얼굴 인식]
 
 from __future__ import absolute_import
 from __future__ import division
@@ -33,6 +34,7 @@ with tf.Graph().as_default():
     with sess.as_default():
         pnet, rnet, onet = detect_face.create_mtcnn(sess, './npy')
 
+        # 사진 설정
         minsize = 20  # minimum size of face
         threshold = [0.6, 0.7, 0.7]  # three steps's threshold
         factor = 0.709  # scale factor
@@ -41,24 +43,27 @@ with tf.Graph().as_default():
         batch_size = 1000
         image_size = 182
         input_image_size = 160
-
-        HumanNames = ['hyeon','junho','park']    #train human name
+        
+        HumanNames = ['hyeon','junho','park']   # 학습한 사람 이름 설정
 
         print('Loading feature extraction model')
-        modeldir = './20180408-102900/20180408-102900.pb'   #pre trained data
+        modeldir = './20180408-102900/20180408-102900.pb'   # 구글 드라이브에서 받은 미리 학습된 데이터
         facenet.load_model(modeldir)
 
+        # 텐서플로우 모델 불러오기
         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
         embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
         phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
         embedding_size = embeddings.get_shape()[1]
 
+        # 학습한 데이터 
         classifier_filename = './my_classifier/my_classifier.pkl'
         classifier_filename_exp = os.path.expanduser(classifier_filename)
         with open(classifier_filename_exp, 'rb') as infile:
             (model, class_names) = pickle.load(infile)
             print('load classifier file-> %s' % classifier_filename_exp)
 
+        # 캠 설정 하기 / cv2.VideoCapture(숫자) <= 연결된 캠이 1개라면 0, 2번째 캠을 설정하고 싶으면 1
         video_capture = cv2.VideoCapture(1)
         c = 0
 
@@ -66,11 +71,18 @@ with tf.Graph().as_default():
         # fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         # out = cv2.VideoWriter('3F_0726.avi', fourcc, fps=30, frameSize=(640,480))
 
+        # ----------------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------- 실시간 얼굴인식 부분 ----------------------------------------------------
+        # ----------------------------------------------------------------------------------------------------------------------------
+
         print('Start Recognition!')
         prevTime = 0
-        detectedPerson = [0,0,0,0]
+        detectedPerson = [0,0,0,0] # 얼굴인식 시 배열에서 인식한 사람의 번호가 올라감
         detectingTime = 15 # 검사시간
         while detectedPerson[0] < detectingTime and detectedPerson[1] < detectingTime and detectedPerson[2] < detectingTime:
+            # 사람(detectedPerson)을 설정한 검사시간(detectingTime) 동안 인식할 때 까지 반복
+
+            # 캠 설정
             ret, frame = video_capture.read()
 
             frame = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)    #resize frame (optional)
@@ -86,11 +98,12 @@ with tf.Graph().as_default():
                 frame = frame[:, :, 0:3]
                 bounding_boxes, _ = detect_face.detect_face(frame, minsize, pnet, rnet, onet, threshold, factor)
                 nrof_faces = bounding_boxes.shape[0]
-                print('Detected_FaceNum: %d' % nrof_faces) # 인식한 사람 숫자
+                print('Detected_FaceNum: %d' % nrof_faces) # 인식한 사람이 몇 명인가
                 print(detectedPerson)
 
+                if nrof_faces > 0: # 1명 이상 인식하면
 
-                if nrof_faces > 0:
+                    # 얼굴인식 처리 부분
                     det = bounding_boxes[:, 0:4]
                     img_size = np.asarray(frame.shape)[0:2]
 
@@ -130,16 +143,20 @@ with tf.Graph().as_default():
                         text_x = bb[i][0]
                         text_y = bb[i][3] + 20
                         # print('result: ', best_class_indices[0])
+
+                        # 누구인가?
                         for H_i in HumanNames:
                             if HumanNames[best_class_indices[0]] == H_i:
                                 result_names = HumanNames[best_class_indices[0]]
                                 cv2.putText(frame, result_names, (text_x, text_y), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                                             1, (0, 0, 255), thickness=1, lineType=2)
 
+                                # 인식한 사람 번호 : best_class_indices[0]
                                 detectedPerson[best_class_indices[0]] += 1
                 else:
                     print('Unable to align')
 
+            # 화면 안에 적히는 글씨
             sec = curTime - prevTime
             prevTime = curTime
             fps = 1 / (sec)
@@ -154,6 +171,7 @@ with tf.Graph().as_default():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
+        # 한 명이 설정 시간 이상 인식되면
         if detectedPerson[0] >= detectingTime :
             print("detected Person is : ", HumanNames[0])
         elif detectedPerson[1] >= detectingTime :

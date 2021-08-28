@@ -1,3 +1,5 @@
+# 촬영한 사진의 얼굴 부분을 추출, 조정함
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -13,14 +15,17 @@ import detect_face
 import random
 from time import sleep
 
+# 조정한 사진 저장될 경로
 output_dir_path = './output_dir'
 output_dir = os.path.expanduser(output_dir_path)
 if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+# 촬영한 사진의 경로
 datadir = './faceData/train'
 dataset = facenet.get_dataset(datadir)
 
+# 아래는 사진 조정
 print('Creating networks and loading parameters')
 with tf.Graph().as_default():
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
