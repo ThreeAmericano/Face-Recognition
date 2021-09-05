@@ -5,7 +5,9 @@
 #####################################################################################
 #
 # 얼굴인식 로직
-# 2021.08.29
+# 2021.09.06
+#
+# Python3.7 / without root
 #
 #####################################################################################
 from __future__ import absolute_import
@@ -95,7 +97,7 @@ def face_recognition(cam_info, detecting_time, time_limit):
 
                 # 시간제한에 걸렸는지 확인
                 limit_interval = time.time() - starting_time
-                if limit_interval > time_limit:
+                if limit_interval > (time_limit - detectingTime + max(detectedPerson)):
                     print("[FaceR] time limit, close the section")
                     break
 
@@ -109,7 +111,7 @@ def face_recognition(cam_info, detecting_time, time_limit):
                     frame = frame[:, :, 0:3]
                     bounding_boxes, _ = detect_face.detect_face(frame, minsize, pnet, rnet, onet, threshold, factor)
                     nrof_faces = bounding_boxes.shape[0]
-                    print('Face: {0}, Count: {1}, TimeLimit[{2:0.1}/{3}]'.format(nrof_faces, detectedPerson, limit_interval, time_limit)) # 디버그 구문.
+                    print('Face: {0}, Count: {1}, TimeLimit[{2}/{3}]'.format(nrof_faces, detectedPerson, int(limit_interval), (time_limit - detectingTime + max(detectedPerson)))) # 디버그 구문.
 
                     if nrof_faces > 0:  # 1명 이상 인식하면
                         # 얼굴인식 처리 부분
@@ -159,16 +161,15 @@ def face_recognition(cam_info, detecting_time, time_limit):
 
                                     # 인식한 사람 번호 : best_class_indices[0]
                                     detectedPerson[best_class_indices[0]] += 1
-                    else:
-                        print('[FaceR] Unable to align')
+
 
                 # 화면 안에 적히는 글씨
                 sec = curTime - prevTime
                 prevTime = curTime
                 fps = 1 / (sec)
                 str = 'FPS: %2.1f' % fps
-                text_fps_x = len(frame[0]) - 150
-                text_fps_y = 20
+                text_fps_x = len(frame[0]) - 100
+                text_fps_y = 10
                 cv2.putText(frame, str, (text_fps_x, text_fps_y),
                             cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), thickness=1, lineType=2)
                 cv2.imshow('Video', frame)
