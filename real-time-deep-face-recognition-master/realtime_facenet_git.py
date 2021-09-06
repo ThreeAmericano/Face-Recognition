@@ -7,7 +7,8 @@
 # 얼굴인식 로직
 # 2021.09.06
 #
-# Python3.7 / without root
+# Python3.7 / without root / result_file을 통해 IPC 통신
+# Linux(Pi) 완전 이식.
 #
 #####################################################################################
 from __future__ import absolute_import
@@ -30,10 +31,10 @@ import copy
 import math
 import pickle
 from sklearn.svm import SVC
-#from sklearn.externals import joblib
-#import sklearn.external.joblib as extjoblib
 import joblib
 from PIL import Image
+
+sys_path = "/home/pi/Face-Recognition/"
 
 # 사진 설정
 minsize = 20  # minimum size of face
@@ -55,11 +56,11 @@ def face_recognition(cam_info, detecting_time, time_limit):
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
         with sess.as_default():
-            pnet, rnet, onet = detect_face.create_mtcnn(sess, './npy')
+            pnet, rnet, onet = detect_face.create_mtcnn(sess, sys_path + 'npy')
 
             # 텐서플로우 모델 불러오기
             print('[FaceR] Loading feature extraction model')
-            modeldir = './20180408-102900/20180408-102900.pb'   # 구글 드라이브에서 받은 미리 학습된 데이터
+            modeldir = sys_path + '20180408-102900/20180408-102900.pb'   # 구글 드라이브에서 받은 미리 학습된 데이터
             facenet.load_model(modeldir)
 
             images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
@@ -68,7 +69,7 @@ def face_recognition(cam_info, detecting_time, time_limit):
             embedding_size = embeddings.get_shape()[1]
 
             # 학습한 데이터
-            classifier_filename = './my_classifier/my_classifier.pkl'
+            classifier_filename = sys_path + 'my_classifier/my_classifier.pkl'
             classifier_filename_exp = os.path.expanduser(classifier_filename)
             with open(classifier_filename_exp, 'rb') as infile:
                 (model, class_names) = pickle.load(infile)
@@ -194,16 +195,22 @@ def face_recognition(cam_info, detecting_time, time_limit):
     return who_is
 
 
+def write_resultfile(path, content):
+    now_time = time.time()
+    with open(path, 'w') as outfile:
+        outfile.write(content + "\n")
+        outfile.write(str(now_time))
+
+
 if __name__ == "__main__":
     print("main")
 
     # UV4L Streaming Path
     stream_url = "http://10.8.0.2:8090/stream/video.mjpeg"
+    result_file_path = "/home/pi/Face-Recognition/face.result"
     name = face_recognition(stream_url, 15, 60)
     if name == 'none':
-        print("감지되지않음")
+        print("감지되지않음 (none 반환)")
     elif name == 'error':
-        print("잘못되엇슴")
-    else:
-        print("그의 이름은 %r" % name)
-
+        print("감지중 오류발생 (error 반환)")
+    write_resultfile(result_file_path, name)
